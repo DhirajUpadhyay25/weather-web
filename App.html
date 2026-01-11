@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        background-size: cover;
+        background-position: center;
+        transition: 0.5s ease-in-out;
+        background-color: skyblue;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        width: 350px;
+      }
+      input {
+        width: 80%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 2px solid #4facfe;
+        border-radius: 6px;
+        outline: none;
+      }
+      button {
+        width: 85%;
+        padding: 12px;
+        background: #4facfe;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #3286f8;
+      }
+      .weather-info {
+        margin-top: 15px;
+        display: none;
+      }
+      .error {
+        color: red;
+        margin-top: 10px;
+      }
+      #tem {
+        color: darkorange;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🌤 Weather App</h2>
+      <input type="text" id="locationInput" placeholder="Enter city..." />
+      <button onclick="getWeather()">Get Weather</button>
+      <div class="weather-info" id="weatherInfo"></div>
+      <p class="error" id="errorMsg"></p>
+    </div>
+
+    <script>
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString();
+      const formattedTime = now.toLocaleTimeString();
+
+      async function getWeather() {
+        const location = document.getElementById("locationInput").value;
+        const weatherInfo = document.getElementById("weatherInfo");
+        const errorMsg = document.getElementById("errorMsg");
+        weatherInfo.style.display = "none";
+        errorMsg.innerText = "";
+
+        if (!location) {
+          errorMsg.innerText = "Please enter a location";
+          return;
+        }
+
+        const apiKey = "c2867183f2184ae38dd102838252102";
+        const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}&aqi=yes`;
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.error) {
+            errorMsg.innerText = "Location not found";
+            return;
+          }
+          document.body.style.backgroundImage = `url('https://${data.current.condition.icon.replace(
+            "64x64",
+            "128x128"
+          )}')`;
+
+          weatherInfo.innerHTML = `
+                    <h3>${data.location.name}, ${data.location.country}</h3>
+                    <p id="tem">🌡 Temperature: ${data.current.temp_c}°C</p>
+                    <p>🌬 Wind: ${data.current.wind_kph} kph</p>
+                    <p>💨 Air Quality Index: ${data.current.air_quality.pm10}</p>
+                    <p> Date: ${formattedDate}</p>
+                    <p> Time:${formattedTime}</p>
+                    <img src="${data.current.condition.icon}" alt="Weather Icon">
+                `;
+
+          weatherInfo.style.display = "block";
+        } catch (error) {
+          errorMsg.innerText = "Error fetching weather data";
+        }
+      }
+    </script>
+  </body>
+</html>
